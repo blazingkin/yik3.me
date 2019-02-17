@@ -1,0 +1,10 @@
+import BLZ-Web-Server
+
+yike_count = 0
+
+:handler
+    yike_count++
+    "<h1><center>yikes: " + yike_count + "</center></h1>"
+end
+
+SimpleHTTPServer(handler, 3000)
