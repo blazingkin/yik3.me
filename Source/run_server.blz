@@ -1,10 +1,31 @@
-import BLZ-Web-Server
+import blz-web-server
+import FileSystem
+import Timer
 
 yike_count = 0
 
-:handler
-    yike_count++
-    "<h1><center>yikes: " + yike_count + "</center></h1>"
+template = FindAndReplaceTemplate("Templates/index.html")
+#static = StaticTemplate("Static/yike.png")
+
+
+:save_yike_count
+    f = open("yike.count", "w")
+    f.write(yike_count)
+    f.close()
 end
 
+:handler(request)
+    if request.path == "/" || request.path == "index" || request.path == "/index"
+        replace = {}
+        replace["{{yikenumber}}"] = yike_count
+        return template.render(replace)
+    else if request.path == "/yike.png" || request.path == "yike.png"
+        print("img")
+        return static.render()
+    end
+end
+
+print("test")
+
+every(5, "minutes").do(save_yike_count)
 SimpleHTTPServer(handler, 3000)
