@@ -16,6 +16,7 @@ end
 
 :handler(request)
     if request.path == "/" || request.path == "index" || request.path == "/index"
+        yike_count++
         replace = {}
         replace["{{yikenumber}}"] = yike_count
         return template.render(replace)
