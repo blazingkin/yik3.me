@@ -1,0 +1,18 @@
+require simple_http_server
+require response
+require template
+
+template = FindAndReplaceTemplate("index.html")
+
+:handler(request)
+    if request.method == "GET"
+        replace = {}
+        replace["{target}"] = "Something else"
+        template.render(replace)
+    else
+        Response("Unsupported method", {}, 405)
+    end
+end
+
+SimpleHTTPServer(handler)
+

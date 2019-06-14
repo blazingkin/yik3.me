@@ -1,0 +1,68 @@
+import FileSystem
+require response
+constructor StaticTemplate(filepath)
+
+    handle = open(filepath)
+    contents = handle.read_all()
+    handle.close()
+
+    html? = filepath.contains?(".html")
+    json? = filepath.contains?(".json")
+    css? = filepath.contains?(".css")
+    png? = filepath.contains?(".png")
+    if html?
+        type = "text/html"
+    else if json?
+        type = "application/json"
+    else if css?
+        type = "text/css"
+    else if png?
+        type = "image/png"
+    else
+        type = "text/plain"
+    end
+    
+    print(contents)
+
+    :render
+        headers = {}
+        headers["Content-Type"] = type
+        Response(contents, headers, 200)
+    end
+end
+
+constructor FindAndReplaceTemplate(filepath)
+
+    handle = open(filepath)
+    contents = handle.read_all()
+    handle.close()
+
+    html? = filepath.contains?(".html")
+    json? = filepath.contains?(".json")
+    css? = filepath.contains?(".css")
+    png? = filepath.contains?(".png")
+    if html?
+        type = "text/html"
+    else if json?
+        type = "application/json"
+    else if css?
+        type = "text/css"
+    else if png?
+        type = "image/png"
+    else
+        type = "text/plain"
+    end
+
+    :render(map)
+        local_contents = copy(contents)
+        if map.type == "HashMap"
+            keys = map.keys()
+            for i = 0; i < keys.length(); i++
+                local_contents.replace!(keys[i], map[keys[i]])
+            end
+        end
+        headers = {}
+        headers["Content-Type"] = type
+        Response(local_contents, headers, 200)
+    end
+end

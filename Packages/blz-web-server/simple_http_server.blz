@@ -1,0 +1,105 @@
+import Socket
+require request
+
+# Handler is of signature (Request -> String) or (Request -> Response)
+constructor SimpleHTTPServer(handler, port)
+    if port == {blz.nil}
+        port = 3000
+    end
+
+    sock = ServerSocket(port)
+    while true
+        sock.accept(translate_http)
+    end
+
+    :parse_headers(str)
+
+    end
+
+    :read_line(res)
+        building_str = ""
+        current = ""
+        while current != "\n"
+            current = res.next()
+            building_str = building_str + current
+        end
+        building_str.replace("\n", "").replace("\r", "")
+    end
+
+    :translate_reason(code)
+        code_reasons = {}
+        code_reasons[201] = "Created"
+        code_reasons[200] = "OK"
+        code_reasons[300] = "Multiple Choices"
+        code_reasons[301] = "Moved Permanently"
+        code_reasons[302] = "Found"
+        code_reasons[303] = "See Other"
+        code_reasons[400] = "Bad Request"
+        code_reasons[401] = "Unauthorized"
+        code_reasons[403] = "Forbidden"
+        code_reasons[404] = "Not Found"
+        code_reasons[405] = "Method Not Allowed"
+        code_reasons[500] = "Internal Server Error"
+        code_reasons[504] = "Gateway Timeout"
+        code_reasons[code]
+    end
+
+
+    :respond(res, code, body, headers)
+        message = "HTTP/1.1 " + code + " " + translate_reason(code) + "\r\n"
+        keys = headers.keys()
+        if headers.has_key?("Content-Type")
+            headers["Content-Type"] = headers.get("Content-Type") + "; charset=utf-8"
+        else
+            headers["Content-Type"] = "text/html; charset=utf-8"
+        end
+        for i = 0; i < keys.length(); i++
+            message = message + keys + ": " + headers.get(keys) + "\r\n"
+        end
+        message = message + "Content-Length: " + body.length() + "\r\n"
+        message = message + "\r\n"
+        message = message + body
+        res.write(message)
+        res.close()
+    end
+
+    :reject_request(res, code, reason)
+        respond(res, code, reason + "\r\n", {})
+    end
+
+    :translate_http(res)
+        request_line = read_line(res)
+        parts = request_line.split_on_token(" ")
+        if parts.length() != 3
+            return reject_request(res, 400, "Invalid HTTP Request")
+        end
+        if parts[2] != "HTTP/1.1" && parts[2] != "HTTP/1.0"
+            print(parts)
+            return reject_request(res, 400, "This server only supports HTTP 1.1 and 1.0")
+        end
+        method = parts[0]
+        path = parts[1]
+        headers = {}
+        while (line = read_line(res)) != ""
+            index = line.index_of(":")
+            if index == -1
+                return reject_request(res, 400, "Invalid header line " + line)
+            end
+            header_name = line.slice(0, index)
+            header_value = line.slice(index+1, line.length())
+            headers[header_name] = header_value.trim()
+        end
+        
+        user_defined_response = handler(Request(headers, "", method, path))
+        if user_defined_response.type == "String"
+            return respond(res, 200, user_defined_response, {})
+        else if user_defined_response.type == "Response"
+            return respond(res, user_defined_response.code, user_defined_response.body, user_defined_response.headers)
+        else
+            return reject_request(res, 500, "Handler returned invalid response", {})
+        end
+
+    end
+
+
+end

@@ -1,0 +1,17 @@
+
+constructor Request(headers, body, method, path)
+
+    :to_json
+        request = {}
+        request["headers"] = headers
+        request["body"] = body
+        request["method"] = method
+        request["path"] = path
+        request.to_json()
+    end
+
+    :show
+        this.to_json()
+    end
+
+end

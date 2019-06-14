@@ -1,0 +1,16 @@
+
+constructor Response(body, headers, code)
+
+    :to_json
+        response = {}
+        response["body"] = body
+        response["headers"] = headers
+        response["code"] = code
+        response.to_json()
+    end
+
+    :show
+        to_json()
+    end
+
+end
